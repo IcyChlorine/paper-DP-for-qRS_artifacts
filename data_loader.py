@@ -4,30 +4,8 @@ import math
 import numpy as np
 import scipy.sparse as sp
 
-from PIL import Image
 import csv, json
 from tqdm import tqdm
-
-# generate random matrix
-def load_random(m=2048, n=1024, fill_ratio=0.1, rd_seed=None) -> np.ndarray:
-	# for reproducibility
-	if rd_seed is not None:
-		np.random.seed(rd_seed)
-
-	A = np.random.rand(m, n)
-	A = np.array(A<fill_ratio, dtype=np.int32)
-	return A
-
-# load an image as matrix
-def load_image(image_path, binary=True) -> np.ndarray:
-	img = Image.open(image_path)
-	img = img.convert('L')
-	img_data = np.array(img)
-	A = np.array(img_data/255, dtype=np.float64)
-	if binary:
-		A = np.round(A)
-	#plt.imshow(A, cmap='gray')
-	return A
 
 def idx(val, arr): # find val in arr, based on binary search
 	res = bisect.bisect_left(arr, val)
@@ -62,34 +40,6 @@ def load_movielen(dir='.', sample_ratio=1, rd_seed=None, binary=True) -> sp.csr_
 
 	# dimension of the downsampled preference matrix
 	m, n = len(selected_users), len(selected_movies)
-	"""A = np.zeros((m, n), dtype=np.float32) # single precision is enough
-
-	# load main table
-	low_mask = (1<<16)-1
-	with open(dir+'/ratings.csv', 'r', encoding='utf-8') as f:
-		reader = csv.reader(f)
-		reader.__next__() # consume title row
-		rec_cnt = 1
-		for row in reader:
-			uid = int(row[0]) # user id
-			mid = int(row[1]) # movie id
-			rating = float(row[2])
-
-			i = idx(uid, selected_users)
-			j = idx(mid, selected_movies)
-			if (i is not None) and (j is not None): # can't abbreviate; i and j can be 0
-				A[i,j] = rating
-
-			rec_cnt += 1
-			if rec_cnt & low_mask == 0: # per 16384 records - bit ops should be faster than mod
-				print(f'\rLoading movielen dataset {rec_cnt/nr_records*100:.2f}%...', end='')
-		print('\rLoading done!', end='')
-
-	if binary:
-		return np.array(A>=3, dtype=np.int32)
-	else:
-		return A
-		"""
 
 	low_mask = (1<<16)-1
 	rows = []; cols = []; data = []
@@ -182,9 +132,9 @@ def load_movielen_10m(dir='.', sample_ratio=1, rd_seed=None, binary=True):
 			if sample_ratio < 1 and np.random.rand() > sample_ratio: continue
 			rec = line.strip()
 			uid, mid, rating, timestamp = rec.split('::')
-			uid = int(uid) - 1;
-			mid = int(mid) - 1;
-			rating = float(rating);
+			uid = int(uid) - 1
+			mid = int(mid) - 1
+			rating = float(rating)
 
 			uids.append(uid)
 			mids.append(mid)
@@ -192,85 +142,10 @@ def load_movielen_10m(dir='.', sample_ratio=1, rd_seed=None, binary=True):
 
 			#if count==300: break
 
-	#print(mids)
-	all_mids = sorted(list(set(mids))) # mid不连续，得重新处理一下 - 别忘了去重！
+	all_mids = sorted(list(set(mids))) # mid is not contniuous
 	mids = [idx(mid, all_mids) for mid in mids]
 	print('Resorting done')
 
 	return sp.csr_matrix((ratings, (uids, mids)), shape=(m, n), dtype=np.float32)
 
 load_movielen_25m = load_movielen
-
-def load_amazon_all_beauty(dir='.', sample_ratio=0.02, rd_seed=None, binary=True) -> sp.csr_matrix:
-	if rd_seed is not None:
-		np.random.seed(rd_seed)
-
-	filepath = dir+'/amazon_all_beauty/All_Beauty.jsonl'
-	records = [] # list of record:=(user id, product id, rating)
-	with open(filepath, 'r') as file:
-		for line in tqdm(file):
-			review = json.loads(line.strip())
-			review = (review['user_id'], review['parent_asin'], review['rating'])
-			records.append(review)
-		records.sort()
-
-	# shall be ordered
-	all_users = sorted(list(set([record[0] for record in records])))
-	all_products = sorted(list(set([record[1] for record in records])))
-	M = len(all_users); N = len(all_products)
-
-	m = math.floor(M*sample_ratio)
-	n = math.floor(N*sample_ratio)
-
-	selected_users = sorted(np.random.choice(all_users, m))
-	selected_products = sorted(np.random.choice(all_products, n))
-
-	rows = []; cols = []; data = []
-	for record in tqdm(records):
-		i = idx(record[0], selected_users)
-		j = idx(record[1], selected_products)
-		if i is None or j is None: continue
-
-		rows.append(i)
-		cols.append(j)
-		data.append(record[2] if not binary else (record[2]>=3))
-
-	return sp.csr_matrix((data, (rows, cols)), shape=(m, n), dtype=np.float32)
-
-
-
-def load_amazon_all_beauty(dir='.', sample_ratio=0.02, rd_seed=None, binary=True) -> sp.csr_matrix:
-	if rd_seed is not None:
-		np.random.seed(rd_seed)
-
-	filepath = dir+'/amazon_all_beauty/All_Beauty.jsonl'
-	records = [] # list of record:=(user id, product id, rating)
-	with open(filepath, 'r') as file:
-		for line in tqdm(file):
-			review = json.loads(line.strip())
-			review = (review['user_id'], review['parent_asin'], review['rating'])
-			records.append(review)
-		records.sort()
-
-	# shall be ordered
-	all_users = sorted(list(set([record[0] for record in records])))
-	all_products = sorted(list(set([record[1] for record in records])))
-	M = len(all_users); N = len(all_products)
-
-	m = math.floor(M*sample_ratio)
-	n = math.floor(N*sample_ratio)
-
-	selected_users = sorted(np.random.choice(all_users, m))
-	selected_products = sorted(np.random.choice(all_products, n))
-
-	rows = []; cols = []; data = []
-	for record in tqdm(records):
-		i = idx(record[0], selected_users)
-		j = idx(record[1], selected_products)
-		if i is None or j is None: continue
-
-		rows.append(i)
-		cols.append(j)
-		data.append(record[2] if not binary else (record[2]>=3))
-
-	return sp.csr_matrix((data, (rows, cols)), shape=(m, n), dtype=np.float32)
