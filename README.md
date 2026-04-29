@@ -11,4 +11,4 @@ The components of the anonymous repository are as follows:
 + `exp_evaluation.ipynb`: Jupyter notebook that conducts the experiments and evaluation in Sec. 7.1 and computes Table 1.
 + `privacy_matched_noise_level_comparison.ipynb`: Jupyter notebook that plots Fig. 4.
 + `k_dependence.ipynb`: Jupyter notebook that conducts the experiments in Appendix E and plots Fig. 6.
-+ `data_loader.py`: Data loader that loads certain MovieLens dataset into matrix form. The datasets need to be be in the same folder as the loader script.
++ `data_loader.py`: Data loader that loads certain MovieLens dataset into matrix form. The datasets need to be in the same folder as the loader script.
