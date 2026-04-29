@@ -2,7 +2,7 @@
 
 We mainly use Python 3.10.9 with `numpy` and `scipy` to run experiments and `matplotlib` to draw the results. The experiments are run on a PC with Intel Core i7-8750H CPU and 16GB memory and the code should be compatible with any recent versions.
 
-The MovieLens datasets can be downloaded from [https://files.grouplens.org/datasets/movielens/](https://files.grouplens.org/datasets/movielens/), and the Netflix dataset can be downloaded from Kaggle. Our code is available on via the anonymous link [https://anonymous.4open.science/r/paper-DP-for-qRS_artifacts-82B0](https://anonymous.4open.science/r/paper-DP-for-qRS_artifacts-82B0) (this site).
+The MovieLens datasets can be downloaded from [https://files.grouplens.org/datasets/movielens/](https://files.grouplens.org/datasets/movielens/), and the Netflix dataset can be downloaded from Kaggle. Our code is available via the anonymous link [https://anonymous.4open.science/r/paper-DP-for-qRS_artifacts-82B0](https://anonymous.4open.science/r/paper-DP-for-qRS_artifacts-82B0) (this site).
 
 The components of the anonymous repository are as follows:
 
