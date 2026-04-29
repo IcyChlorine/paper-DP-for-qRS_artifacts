@@ -1,4 +1,4 @@
-# Artifacts for paper: *Differential Privacy of Quantum and Quantum-Inspired-Classical Recommendation Algorithms*
+# Artifacts for paper: *Differential Privacy of Quantum and Quantum-Inspired Classical Recommendation Algorithms*
 
 We mainly use Python 3.10.9 with `numpy` and `scipy` to run experiments and `matplotlib` to draw the results. The experiments are run on a PC with Intel Core i7-8750H CPU and 16GB memory and the code should be compatible with any recent versions.
 
